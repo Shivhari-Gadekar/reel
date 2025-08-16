@@ -35,8 +35,7 @@
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <h2 class="text-lg font-semibold text-slate-700 mb-2">2. Default Intro & Outro</h2>
           <p class="text-sm text-slate-500">
-            The files <code class="bg-slate-100 p-1 rounded-md text-slate-600">intro.mp4</code> and <code class="bg-slate-100 p-1 rounded-md text-slate-600">outro.mp4</code> will be used automatically.
-            Make sure they are in the same folder as this HTML file.
+            Using default videos <code class="bg-slate-100 p-1 rounded-md text-slate-600">./intro.mp4</code> and <code class="bg-slate-100 p-1 rounded-md text-slate-600">./outro.mp4</code> automatically.
           </p>
         </div>
 
@@ -109,12 +108,11 @@
   const PREVIEW_W = 272, PREVIEW_H = 496;
   const FPS = 30;
   
-  // NEW: Define default video URLs
-  const DEFAULT_INTRO_URL = 'intro.mp4';
-  const DEFAULT_OUTRO_URL = 'outro.mp4';
+  // UPDATED: Define default video URLs using the ./ prefix
+  const DEFAULT_INTRO_URL = './intro.mp4';
+  const DEFAULT_OUTRO_URL = './outro.mp4';
 
   const folderInput = document.getElementById('folderInput');
-  // REMOVED: introFile and outroFile element selectors are no longer needed
   const audioFile = document.getElementById('audioFile');
   const secPerInput = document.getElementById('secPer');
   const incrementBtn = document.getElementById('incrementBtn');
@@ -225,7 +223,6 @@
     return images;
   }
 
-  // NEW: Function to load a video element from a URL
   function makeVideoElementFromUrl(url) {
     const v = document.createElement('video');
     v.muted = true;
@@ -233,7 +230,7 @@
     v.loop = false;
     v.preload = 'auto';
     v.src = url;
-    v.crossOrigin = 'anonymous'; // Important for canvas
+    v.crossOrigin = 'anonymous'; 
     return v;
   }
 
@@ -269,15 +266,12 @@
 
     const secPer = Math.max(1, Number(secPerInput.value) || 3);
     
-    // MODIFIED: Create video elements from the default URLs
     const introVid = makeVideoElementFromUrl(DEFAULT_INTRO_URL);
     const outroVid = makeVideoElementFromUrl(DEFAULT_OUTRO_URL);
     
-    // Helper function to check if a video can be loaded
     const canLoadVideo = (video) => new Promise(resolve => {
         video.addEventListener('canplay', () => resolve(true), { once: true });
         video.addEventListener('error', () => resolve(false), { once: true });
-        // Timeout in case the video file is missing and events don't fire
         setTimeout(() => resolve(false), 3000);
     });
 
