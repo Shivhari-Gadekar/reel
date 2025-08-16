@@ -286,10 +286,6 @@
 
     const secPer = Math.max(1, Number(secPerInput.value) || 3);
     
-    // =====================================================================
-    // CORE LOGIC CHANGE IS HERE
-    // It checks if a file was selected. If not, it uses the default URL.
-    // =====================================================================
     let introVid = null;
     let outroVid = null;
 
@@ -304,12 +300,14 @@
     } else {
         outroVid = makeVideoElementFromUrl(DEFAULT_OUTRO_URL);
     }
-    // =====================================================================
     
     const canLoadVideo = (video) => new Promise(resolve => {
-        if (!video.src) return resolve(false);
+        if (!video.src || video.src.endsWith('null')) return resolve(false);
         video.addEventListener('canplay', () => resolve(true), { once: true });
-        video.addEventListener('error', () => resolve(false), { once: true });
+        video.addEventListener('error', (e) => {
+            console.error("Video Error:", e);
+            resolve(false);
+        }, { once: true });
         setTimeout(() => resolve(video.readyState > 2), 3000);
     });
 
