@@ -6,17 +6,10 @@
   <title>Reel Builder: Ramdwara</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    input[type="file"]::file-selector-button {
-      font-weight: 500;
-    }
+    input[type="file"]::file-selector-button { font-weight: 500; }
     input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
   </style>
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-800 lg:flex lg:items-center lg:justify-center lg:min-h-screen">
@@ -33,15 +26,22 @@
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-2">2. Default Intro & Outro</h2>
-          <p class="text-sm text-slate-500">
-            Using default videos <code class="bg-slate-100 p-1 rounded-md text-slate-600">./intro.mp4</code> and <code class="bg-slate-100 p-1 rounded-md text-slate-600">./outro.mp4</code> automatically.
-          </p>
+          <h2 class="text-lg font-semibold text-slate-700 mb-4">2. Add Intro & Outro (Optional)</h2>
+          <p class="text-sm text-slate-500 mb-4">Uses default videos from the repository if none are selected.</p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label for="introFile" class="block text-sm font-medium text-slate-600 mb-2">Intro Video</label>
+              <input id="introFile" type="file" accept="video/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"/>
+            </div>
+            <div>
+              <label for="outroFile" class="block text-sm font-medium text-slate-600 mb-2">Outro Video</label>
+              <input id="outroFile" type="file" accept="video/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"/>
+            </div>
+          </div>
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <h2 class="text-lg font-semibold text-slate-700 mb-4">3. Image Template</h2>
-          <p class="text-sm text-slate-500 mb-4">This template will be applied to every image from the folder.</p>
           <div class="grid sm:grid-cols-2 gap-6">
             <div class="space-y-4">
               <input id="branchText" type="text" placeholder="Ramdwara Branch (e.g., Pune)" class="p-1 ps-2 w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -65,14 +65,10 @@
         
         <div class="relative mx-auto border-gray-900 bg-gray-900 border-[8px] rounded-[2.5rem] h-[512px] w-[288px] shadow-xl">
             <div class="w-[80px] h-[14px] bg-gray-900 top-0 rounded-b-[1rem] left-1/2 -translate-x-1/2 absolute"></div>
-            <div class="h-[32px] w-[3px] bg-gray-900 absolute -left-[11px] top-[72px] rounded-l-lg"></div>
-            <div class="h-[32px] w-[3px] bg-gray-900 absolute -left-[11px] top-[124px] rounded-l-lg"></div>
-            <div class="h-[48px] w-[3px] bg-gray-900 absolute -right-[11px] top-[142px] rounded-r-lg"></div>
-            <div id="preview" class="rounded-[2rem] overflow-hidden w-full h-full bg-black">
-            </div>
+            <div id="preview" class="rounded-[2rem] overflow-hidden w-full h-full bg-black"></div>
         </div>
         
-        <div id="status" class="w-full max-w-md mt-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[100px]">
+        <div id="status" class="w-full max-w-md mt-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 min-h-[100px] text-sm">
           Ready to build your reel.
         </div>
         
@@ -85,11 +81,7 @@
             </div>
             <div class="flex items-center justify-between">
               <label for="secPer" class="text-sm font-medium text-slate-600">Seconds per image:</label>
-              <div class="flex items-center">
-                <button id="decrementBtn" type="button" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-l-md hover:bg-slate-300">-</button>
-                <input id="secPer" type="number" value="3" min="1" class="w-16 text-center border-t border-b border-slate-300 py-1 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
-                <button id="incrementBtn" type="button" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-r-md hover:bg-slate-300">+</button>
-              </div>
+              <input id="secPer" type="number" value="3" min="1" class="w-16 text-center border-slate-300 border py-1 shadow-sm focus:border-blue-500 focus:ring-blue-500 rounded-md" />
             </div>
           </div>
         </div>
@@ -104,73 +96,63 @@
 
 <script>
 (async function(){
+  // --- CONFIGURATION ---
   const OUT_W = 1080, OUT_H = 1920;
   const PREVIEW_W = 272, PREVIEW_H = 496;
   const FPS = 30;
-  
-  // UPDATED: Define default video URLs using the ./ prefix
   const DEFAULT_INTRO_URL = './intro.mp4';
   const DEFAULT_OUTRO_URL = './outro.mp4';
 
+  // --- GET ELEMENTS ---
   const folderInput = document.getElementById('folderInput');
+  const introFile = document.getElementById('introFile');
+  const outroFile = document.getElementById('outroFile');
   const audioFile = document.getElementById('audioFile');
   const secPerInput = document.getElementById('secPer');
-  const incrementBtn = document.getElementById('incrementBtn');
-  const decrementBtn = document.getElementById('decrementBtn');
-
   const startBtn = document.getElementById('startBtn');
   const stopBtn = document.getElementById('stopBtn');
   const preview = document.getElementById('preview');
   const status = document.getElementById('status');
-  
   const branchText = document.getElementById('branchText');
   const satsangPlaceText = document.getElementById('satsangPlaceText');
   const templateBgColor = document.getElementById('templateBgColor');
   const templatePreviewCanvas = document.getElementById('templatePreviewCanvas');
   const templatePreviewCtx = templatePreviewCanvas.getContext('2d');
-
-  incrementBtn.addEventListener('click', () => {
-    secPerInput.value = parseInt(secPerInput.value, 10) + 1;
-  });
-
-  decrementBtn.addEventListener('click', () => {
-    const currentValue = parseInt(secPerInput.value, 10);
-    if (currentValue > 1) {
-      secPerInput.value = currentValue - 1;
-    }
-  });
-
+  
+  // --- PREVIEW & OFFSCREEN CANVASES ---
   const previewCanvas = document.createElement('canvas');
   previewCanvas.width = PREVIEW_W;
   previewCanvas.height = PREVIEW_H;
   preview.appendChild(previewCanvas);
   const pctx = previewCanvas.getContext('2d');
-
   const offscreenCanvas = document.createElement('canvas');
   offscreenCanvas.width = OUT_W;
   offscreenCanvas.height = OUT_H;
   const octx = offscreenCanvas.getContext('2d');
 
+  // --- HELPER FUNCTIONS ---
+  const updateStatus = (msg, isError = false) => {
+    console[isError ? 'error' : 'log'](msg);
+    status.innerHTML = msg;
+    status.className = status.className.replace(/text-(red|green)-700/, '');
+    if (isError) status.classList.add('text-red-700');
+  };
+
   function drawTemplateText(ctx, width, height, branch, satsang, bg) {
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, width, height);
-
     ctx.fillStyle = '#1f2937';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-
     ctx.font = `normal ${height * 0.03}px sans-serif`;
     ctx.fillText("|| Satswaroop Ram ||", width / 2, height * 0.05);
-
     ctx.font = `bold ${height * 0.04}px sans-serif`;
     ctx.fillText("Directed by Ramdwara", width / 2, height * 0.12);
     ctx.fillText("(Jagatpal) Jalgaon,", width / 2, height * 0.18);
     ctx.fillText("Maharasthra", width / 2, height * 0.24);
-
     ctx.font = `bold ${height * 0.03}px sans-serif`;
     ctx.fillText("CHANT RAM NAAM,", width / 2, height * 0.75);
     ctx.fillText("ENLIGHTEN YOUR FUTURE", width / 2, height * 0.81);
-
     ctx.font = `bold ${height * 0.025}px sans-serif`;
     ctx.fillText(`Ramdwara Branch : ${branch}`, width / 2, height * 0.90);
     ctx.fillText(`Satsang Place : ${satsang}`, width / 2, height * 0.95);
@@ -180,10 +162,8 @@
     const rect = templatePreviewCanvas.getBoundingClientRect();
     templatePreviewCanvas.width = rect.width * 2;
     templatePreviewCanvas.height = rect.height * 2;
-    
     const { width, height } = templatePreviewCanvas;
     drawTemplateText(templatePreviewCtx, width, height, branchText.value, satsangPlaceText.value, templateBgColor.value);
-    
     templatePreviewCtx.fillStyle = 'rgba(0,0,0,0.1)';
     templatePreviewCtx.fillRect(0, height * 0.32, width, height * 0.36);
     templatePreviewCtx.fillStyle = '#1f2937';
@@ -191,163 +171,124 @@
     templatePreviewCtx.fillText("Image appears here", width / 2, height * 0.5);
   }
   
-  [branchText, satsangPlaceText, templateBgColor].forEach(el => {
-    el.addEventListener('input', updateTemplatePreview);
-  });
-  
+  [branchText, satsangPlaceText, templateBgColor].forEach(el => el.addEventListener('input', updateTemplatePreview));
   setTimeout(updateTemplatePreview, 100);
 
-  function loadImageFile(file) {
-    return new Promise((res, rej) => {
-      const img = new Image();
-      img.onload = () => res(img);
-      img.onerror = rej;
-      img.src = URL.createObjectURL(file);
-    });
-  }
-
-  async function readImagesFromFolder() {
-    const files = Array.from(folderInput.files || [])
-      .filter(f => f.type.startsWith('image/'))
-      .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-    
-    const images = [];
-    for (const f of files) {
-      try {
-        const img = await loadImageFile(f);
-        images.push(img);
-      } catch (e) {
-        console.warn('Failed to load image', f.name);
-      }
-    }
-    return images;
-  }
-
-  function makeVideoElementFromUrl(url) {
+  function makeVideoElement(source) {
     const v = document.createElement('video');
     v.muted = true;
     v.playsInline = true;
-    v.loop = false;
     v.preload = 'auto';
-    v.src = url;
-    v.crossOrigin = 'anonymous'; 
+    v.crossOrigin = 'anonymous';
+    v.src = (source instanceof File) ? URL.createObjectURL(source) : source;
     return v;
   }
 
-  function drawVideoCover(ctx, video) {
-    const cw = ctx.canvas.width, ch = ctx.canvas.height;
-    const vw = video.videoWidth, vh = video.videoHeight;
-    if (!vw || !vh) return;
-    const scale = Math.max(cw / vw, ch / vh);
-    const dw = vw * scale, dh = vh * scale;
-    const dx = (cw - dw) / 2, dy = (ch - dh) / 2;
-    ctx.drawImage(video, dx, dy, dw, dh);
-  }
-
+  // --- MAIN LOGIC ---
   startBtn.addEventListener('click', async () => {
-    if (!folderInput.files.length) {
-      status.textContent = 'Error: Please select an images folder.';
-      return;
-    }
     startBtn.disabled = true;
     stopBtn.disabled = false;
-    status.textContent = 'Loading images...';
 
-    const images = await readImagesFromFolder();
-    
-    status.textContent = 'Loading media...';
-
-    if (images.length === 0) {
-      status.textContent = 'Error: No images were loaded successfully.';
+    if (!folderInput.files.length) {
+      updateStatus("ERROR: Please select an images folder first.", true);
       startBtn.disabled = false;
       stopBtn.disabled = true;
       return;
     }
+    
+    updateStatus("1. Reading images from folder...");
+    const imageFiles = Array.from(folderInput.files).filter(f => f.type.startsWith('image/')).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    const images = await Promise.all(imageFiles.map(f => new Promise((res, rej) => {
+        const img = new Image();
+        img.onload = () => res(img);
+        img.onerror = rej;
+        img.src = URL.createObjectURL(f);
+    })));
+
+    if (images.length === 0) {
+        updateStatus("ERROR: No valid images found in the selected folder.", true);
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        return;
+    }
+    updateStatus(`Found ${images.length} images. Preparing videos...`);
 
     const secPer = Math.max(1, Number(secPerInput.value) || 3);
-    
-    const introVid = makeVideoElementFromUrl(DEFAULT_INTRO_URL);
-    const outroVid = makeVideoElementFromUrl(DEFAULT_OUTRO_URL);
-    
-    const canLoadVideo = (video) => new Promise(resolve => {
-        video.addEventListener('canplay', () => resolve(true), { once: true });
-        video.addEventListener('error', () => resolve(false), { once: true });
-        setTimeout(() => resolve(false), 3000);
+    const seq = [];
+
+    // --- Video Loading Logic ---
+    const canLoadVideo = (video, name) => new Promise(resolve => {
+        video.addEventListener('canplay', () => {
+            updateStatus(`${name} video loaded successfully.`);
+            resolve(video);
+        });
+        video.addEventListener('error', (e) => {
+            updateStatus(`Warning: Could not load ${name} video. Check file name and location.`, true);
+            resolve(null);
+        });
+        setTimeout(() => resolve(null), 4000); // 4 second timeout
     });
 
-    const hasIntro = await canLoadVideo(introVid);
-    const hasOutro = await canLoadVideo(outroVid);
+    const introSource = introFile.files.length ? introFile.files[0] : DEFAULT_INTRO_URL;
+    updateStatus("2. Loading Intro Video...");
+    const introVid = await canLoadVideo(makeVideoElement(introSource), "Intro");
+    if (introVid) seq.push({ type: 'video', obj: introVid });
+    
+    images.forEach(img => seq.push({ type: 'image', obj: img, duration: secPer }));
+    
+    const outroSource = outroFile.files.length ? outroFile.files[0] : DEFAULT_OUTRO_URL;
+    updateStatus("3. Loading Outro Video...");
+    const outroVid = await canLoadVideo(makeVideoElement(outroSource), "Outro");
+    if (outroVid) seq.push({ type: 'video', obj: outroVid });
 
-    if (hasIntro) {
-        try { await introVid.play(); introVid.pause(); introVid.currentTime = 0; } catch (e) { console.warn("Intro video unlock failed.", e); }
-    }
-    if (hasOutro) {
-        try { await outroVid.play(); outroVid.pause(); outroVid.currentTime = 0; } catch (e) { console.warn("Outro video unlock failed.", e); }
-    }
-
-    let audioContext;
-    let bgAudioBuffer = null;
+    // --- Audio Loading Logic ---
+    let audioContext, bgAudioBuffer;
     if (audioFile.files.length) {
+        updateStatus("4. Loading audio file...");
         try {
             audioContext = new AudioContext();
             const arrayBuffer = await audioFile.files[0].arrayBuffer();
             bgAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        } catch (e) {
-            status.textContent = "Error: Could not process the audio file.";
+            updateStatus("Audio loaded successfully.");
+        } catch(e) {
+            updateStatus("ERROR: Could not process audio file.", true);
             startBtn.disabled = false; stopBtn.disabled = true; return;
         }
     }
 
-    const seq = [];
-    if (hasIntro) seq.push({ type: 'video', obj: introVid });
-    images.forEach(img => seq.push({ type: 'image', obj: img, duration: secPer }));
-    if (hasOutro) seq.push({ type: 'video', obj: outroVid });
-
+    // --- Media Recorder Setup ---
+    updateStatus("5. Setting up recorder...");
     const canvasStream = offscreenCanvas.captureStream(FPS);
-
-    let finalStream;
-    let audioDestination;
-
-    if (bgAudioBuffer) {
-        audioDestination = audioContext.createMediaStreamDestination();
-        finalStream = new MediaStream([...canvasStream.getVideoTracks(), ...audioDestination.stream.getAudioTracks()]);
-    } else {
-        finalStream = canvasStream;
-    }
-
-    const mimeTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
-    const mimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type)) || '';
-
-    if (!mimeType) {
-        status.textContent = 'Error: MediaRecorder not supported in this browser.';
+    const audioDestination = audioContext ? audioContext.createMediaStreamDestination() : null;
+    const finalStream = new MediaStream([
+        ...canvasStream.getVideoTracks(),
+        ...(audioDestination ? audioDestination.stream.getAudioTracks() : [])
+    ]);
+    
+    if (!MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+        updateStatus("ERROR: Browser not supported.", true);
         startBtn.disabled = false; stopBtn.disabled = true; return;
     }
-
+    const recorder = new MediaRecorder(finalStream, { mimeType: 'video/webm;codecs=vp9,opus' });
     const recordedBlobs = [];
-    const recorder = new MediaRecorder(finalStream, { mimeType });
-
-    recorder.ondataavailable = e => {
-      if (e.data && e.data.size) recordedBlobs.push(e.data);
-    };
-
+    recorder.ondataavailable = e => { if (e.data && e.data.size) recordedBlobs.push(e.data); };
     recorder.onstop = () => {
-      const blob = new Blob(recordedBlobs, { type: mimeType });
+      const blob = new Blob(recordedBlobs, { type: 'video/webm' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `reel.webm`;
-      a.className = 'inline-block mt-4 px-5 py-2.5 bg-green-600 text-white font-medium text-sm leading-tight uppercase rounded-lg shadow-md hover:bg-green-700';
-      a.textContent = `Download reel.webm`;
-      status.innerHTML = `<span class="font-semibold">Recording finished.</span><br/>`;
+      a.className = 'inline-block mt-4 px-5 py-2.5 bg-green-600 text-white font-medium uppercase rounded-lg shadow-md hover:bg-green-700';
+      a.textContent = `Download Reel`;
+      updateStatus('Recording finished. Click to download.<br>');
       status.appendChild(a);
     };
 
-    recorder.start(1000);
-    status.textContent = 'Recording...';
-
-    let bgAudioSourceNode = null;
-    if (bgAudioBuffer && audioContext && audioDestination) {
-        bgAudioSourceNode = audioContext.createBufferSource();
+    // --- Start Recording & Rendering ---
+    recorder.start();
+    updateStatus("✅ Recording started...");
+    if (bgAudioBuffer) {
+        const bgAudioSourceNode = audioContext.createBufferSource();
         bgAudioSourceNode.buffer = bgAudioBuffer;
         bgAudioSourceNode.connect(audioDestination);
         bgAudioSourceNode.connect(audioContext.destination);
@@ -357,99 +298,59 @@
     let stopped = false;
     stopBtn.onclick = () => { stopped = true; };
 
-    function drawPreview() {
-      pctx.clearRect(0, 0, PREVIEW_W, PREVIEW_H);
-      pctx.drawImage(offscreenCanvas, 0, 0, PREVIEW_W, PREVIEW_H);
-    }
+    const drawPreview = () => pctx.drawImage(offscreenCanvas, 0, 0, PREVIEW_W, PREVIEW_H);
 
-    async function playVideoToCanvas(video) {
-      return new Promise(resolve => {
-        video.muted = true;
-        const startPlaying = () => {
-          video.currentTime = 0;
-          video.play().catch(err => resolve());
-          
-          function step() {
-            if (stopped || video.ended || video.currentTime >= video.duration - 0.05) {
-              video.pause(); resolve(); return;
-            }
-            if (video.videoWidth && video.videoHeight) {
-              octx.clearRect(0, 0, OUT_W, OUT_H);
-              drawVideoCover(octx, video);
-              drawPreview();
-            }
-            requestAnimationFrame(step);
-          }
-          requestAnimationFrame(step);
-        };
-        if (video.readyState >= 2) startPlaying();
-        else video.addEventListener('loadeddata', startPlaying, { once: true });
-      });
-    }
-
-    async function showImageWithTemplate(img, durationSec) {
-      return new Promise(resolve => {
-        const start = performance.now();
-        function step(now) {
-          const elapsed = (now - start) / 1000;
-          if (stopped || elapsed > durationSec) { resolve(); return; }
-          
-          drawTemplateText(octx, OUT_W, OUT_H, branchText.value, satsangPlaceText.value, templateBgColor.value);
-
-          const progress = Math.min(1, elapsed / durationSec);
-          const scale = 1 + 0.10 * progress;
-          
-          const imageContainerY = OUT_H * 0.32;
-          const imageContainerHeight = OUT_H * 0.36;
-          const imageContainerWidth = OUT_W;
-
-          octx.save();
-          octx.beginPath();
-          octx.rect(0, imageContainerY, imageContainerWidth, imageContainerHeight);
-          octx.clip();
-
-          const imgScale = imageContainerWidth / img.width;
-          const baseWidth = img.width * imgScale;
-          const baseHeight = img.height * imgScale;
-
-          const currentWidth = baseWidth * scale;
-          const currentHeight = baseHeight * scale;
-          
-          const dx = (imageContainerWidth - currentWidth) / 2;
-          const dy = imageContainerY + (imageContainerHeight - currentHeight) / 2;
-
-          octx.drawImage(img, dx, dy, currentWidth, currentHeight);
-          octx.restore();
-
-          drawPreview();
-          requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
-      });
-    }
-
-    async function runSequence() {
-      for (const item of seq) {
+    for (const item of seq) {
         if (stopped) break;
         if (item.type === 'video') {
-          await playVideoToCanvas(item.obj);
+            await new Promise(resolve => {
+                const video = item.obj;
+                video.currentTime = 0;
+                video.play();
+                const step = () => {
+                    if (stopped || video.ended) { video.pause(); return resolve(); }
+                    octx.clearRect(0, 0, OUT_W, OUT_H);
+                    const scale = Math.max(OUT_W / video.videoWidth, OUT_H / video.videoHeight);
+                    const dw = video.videoWidth * scale, dh = video.videoHeight * scale;
+                    octx.drawImage(video, (OUT_W - dw) / 2, (OUT_H - dh) / 2, dw, dh);
+                    drawPreview();
+                    requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+            });
         } else if (item.type === 'image') {
-          await showImageWithTemplate(item.obj, item.duration);
+            await new Promise(resolve => {
+                const start = performance.now();
+                const step = now => {
+                    const elapsed = (now - start) / 1000;
+                    if (stopped || elapsed > item.duration) return resolve();
+                    drawTemplateText(octx, OUT_W, OUT_H, branchText.value, satsangPlaceText.value, templateBgColor.value);
+                    const progress = Math.min(1, elapsed / item.duration);
+                    const scale = 1 + 0.10 * progress;
+                    const img = item.obj;
+                    const imgContainerY = OUT_H * 0.32, imgContainerH = OUT_H * 0.36;
+                    const imgScale = OUT_W / img.width;
+                    const currentW = img.width * imgScale * scale, currentH = img.height * imgScale * scale;
+                    octx.save();
+                    octx.beginPath();
+                    octx.rect(0, imgContainerY, OUT_W, imgContainerH);
+                    octx.clip();
+                    octx.drawImage(img, (OUT_W - currentW) / 2, imgContainerY + (imgContainerH - currentH) / 2, currentW, currentH);
+                    octx.restore();
+                    drawPreview();
+                    requestAnimationFrame(step);
+                };
+                requestAnimationFrame(step);
+            });
         }
-      }
     }
 
-    await runSequence();
-
-    setTimeout(() => {
-      if (recorder.state === "recording") recorder.stop();
-      if (bgAudioSourceNode) bgAudioSourceNode.stop(0);
-      if (audioContext && audioContext.state !== 'closed') audioContext.close();
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
-      status.innerHTML += ' <span class="italic">Processing...</span>';
-    }, 500);
-
+    // --- Finalize ---
+    if (recorder.state === "recording") recorder.stop();
+    if (audioContext && audioContext.state !== 'closed') audioContext.close();
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    updateStatus("Processing final video...");
   });
 })();
 </script>
