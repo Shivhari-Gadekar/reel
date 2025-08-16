@@ -33,10 +33,18 @@
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-2">2. Default Intro & Outro</h2>
-          <p class="text-sm text-slate-500">
-            Using default videos <code class="bg-slate-100 p-1 rounded-md text-slate-600">./intro.mp4</code> and <code class="bg-slate-100 p-1 rounded-md text-slate-600">./outro.mp4</code> automatically.
-          </p>
+          <h2 class="text-lg font-semibold text-slate-700 mb-4">2. Add Intro & Outro (Optional)</h2>
+          <p class="text-sm text-slate-500 mb-4">Uses default videos from the repository if none are selected.</p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label for="introFile" class="block text-sm font-medium text-slate-600 mb-2">Intro Video</label>
+              <input id="introFile" type="file" accept="video/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"/>
+            </div>
+            <div>
+              <label for="outroFile" class="block text-sm font-medium text-slate-600 mb-2">Outro Video</label>
+              <input id="outroFile" type="file" accept="video/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"/>
+            </div>
+          </div>
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
@@ -108,11 +116,12 @@
   const PREVIEW_W = 272, PREVIEW_H = 496;
   const FPS = 30;
   
-  // UPDATED: Define default video URLs using the ./ prefix
   const DEFAULT_INTRO_URL = './intro.mp4';
   const DEFAULT_OUTRO_URL = './outro.mp4';
 
   const folderInput = document.getElementById('folderInput');
+  const introFile = document.getElementById('introFile');
+  const outroFile = document.getElementById('outroFile');
   const audioFile = document.getElementById('audioFile');
   const secPerInput = document.getElementById('secPer');
   const incrementBtn = document.getElementById('incrementBtn');
@@ -223,6 +232,17 @@
     return images;
   }
 
+  function makeVideoElementFromFile(file) {
+    const v = document.createElement('video');
+    v.muted = true;
+    v.playsInline = true;
+    v.loop = false;
+    v.preload = 'auto';
+    v.src = URL.createObjectURL(file);
+    v.crossOrigin = 'anonymous';
+    return v;
+  }
+  
   function makeVideoElementFromUrl(url) {
     const v = document.createElement('video');
     v.muted = true;
@@ -266,13 +286,31 @@
 
     const secPer = Math.max(1, Number(secPerInput.value) || 3);
     
-    const introVid = makeVideoElementFromUrl(DEFAULT_INTRO_URL);
-    const outroVid = makeVideoElementFromUrl(DEFAULT_OUTRO_URL);
+    // =====================================================================
+    // CORE LOGIC CHANGE IS HERE
+    // It checks if a file was selected. If not, it uses the default URL.
+    // =====================================================================
+    let introVid = null;
+    let outroVid = null;
+
+    if (introFile.files.length > 0) {
+        introVid = makeVideoElementFromFile(introFile.files[0]);
+    } else {
+        introVid = makeVideoElementFromUrl(DEFAULT_INTRO_URL);
+    }
+
+    if (outroFile.files.length > 0) {
+        outroVid = makeVideoElementFromFile(outroFile.files[0]);
+    } else {
+        outroVid = makeVideoElementFromUrl(DEFAULT_OUTRO_URL);
+    }
+    // =====================================================================
     
     const canLoadVideo = (video) => new Promise(resolve => {
+        if (!video.src) return resolve(false);
         video.addEventListener('canplay', () => resolve(true), { once: true });
         video.addEventListener('error', () => resolve(false), { once: true });
-        setTimeout(() => resolve(false), 3000);
+        setTimeout(() => resolve(video.readyState > 2), 3000);
     });
 
     const hasIntro = await canLoadVideo(introVid);
