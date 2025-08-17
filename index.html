@@ -5,11 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reel Builder: Ramdwara</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
   <style>
     input[type="file"]::file-selector-button { font-weight: 500; }
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     input[type=number] { -moz-appearance: textfield; }
+    /* Styles for the crop modal */
+    #cropModal { display: none; }
+    #cropModal.flex { display: flex; }
+    /* Ensure cropper image is not tiny before it loads */
+    #imageToCrop { max-width: 80vw; max-height: 70vh; }
   </style>
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-800 lg:flex lg:items-center lg:justify-center lg:min-h-screen">
@@ -25,8 +32,16 @@
           <input id="folderInput" type="file" webkitdirectory directory multiple class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"/>
         </div>
 
+        <!-- NEW: Image Review and Crop Section -->
+        <div id="imageReviewContainer" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hidden">
+          <h2 class="text-lg font-semibold text-slate-700 mb-4">2. Review & Crop Images</h2>
+          <div id="imageThumbnailGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 max-h-96 overflow-y-auto p-2 bg-slate-50 rounded-lg">
+            <!-- Image thumbnails will be injected here -->
+          </div>
+        </div>
+
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-4">2. Add Intro & Outro (Optional)</h2>
+          <h2 class="text-lg font-semibold text-slate-700 mb-4">3. Add Intro & Outro (Optional)</h2>
           <p class="text-sm text-slate-500 mb-4">Uses default videos from the repository if none are selected.</p>
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
@@ -41,7 +56,7 @@
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-4">3. Image Template</h2>
+          <h2 class="text-lg font-semibold text-slate-700 mb-4">4. Image Template</h2>
           <div class="grid sm:grid-cols-2 gap-6">
             <div class="space-y-4">
               <input id="branchText" type="text" placeholder="Ramdwara Branch (e.g., Pune)" class="p-1 ps-2 w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -73,7 +88,7 @@
         </div>
         
         <div class="w-full max-w-md mt-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-4">4. Audio & Settings</h2>
+          <h2 class="text-lg font-semibold text-slate-700 mb-4">5. Audio & Settings</h2>
           <div class="space-y-4">
             <div>
               <label for="audioFile" class="block text-sm font-medium text-slate-600 mb-2">Background Audio</label>
@@ -94,6 +109,20 @@
     </main>
   </div>
 
+  <!-- NEW: Crop Modal -->
+  <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center p-4">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl w-full">
+      <h2 class="text-xl font-semibold mb-4">Crop Image</h2>
+      <div>
+        <img id="imageToCrop" src="" alt="Image to crop">
+      </div>
+      <div class="mt-6 flex justify-end gap-4">
+        <button id="cancelCropBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+        <button id="saveCropBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Save Crop</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 (async function(){
   // --- CONFIGURATION ---
@@ -105,6 +134,8 @@
 
   // --- GET ELEMENTS ---
   const folderInput = document.getElementById('folderInput');
+  const imageReviewContainer = document.getElementById('imageReviewContainer');
+  const imageThumbnailGrid = document.getElementById('imageThumbnailGrid');
   const introFile = document.getElementById('introFile');
   const outroFile = document.getElementById('outroFile');
   const audioFile = document.getElementById('audioFile');
@@ -119,6 +150,17 @@
   const templatePreviewCanvas = document.getElementById('templatePreviewCanvas');
   const templatePreviewCtx = templatePreviewCanvas.getContext('2d');
   
+  // --- CROP MODAL ELEMENTS ---
+  const cropModal = document.getElementById('cropModal');
+  const imageToCrop = document.getElementById('imageToCrop');
+  const cancelCropBtn = document.getElementById('cancelCropBtn');
+  const saveCropBtn = document.getElementById('saveCropBtn');
+
+  // --- STATE MANAGEMENT ---
+  let imageState = []; // To hold { file, originalSrc, croppedSrc, name, cropData }
+  let cropperInstance = null;
+  let currentCropIndex = -1;
+  
   // --- PREVIEW & OFFSCREEN CANVASES ---
   const previewCanvas = document.createElement('canvas');
   previewCanvas.width = PREVIEW_W;
@@ -132,7 +174,6 @@
 
   // --- HELPER FUNCTIONS ---
   const updateStatus = (msg, isError = false) => {
-    console[isError ? 'error' : 'log'](msg);
     status.innerHTML = msg;
     status.className = status.className.replace(/text-(red|green)-700/, '');
     if (isError) status.classList.add('text-red-700');
@@ -184,33 +225,140 @@
     return v;
   }
 
+  // --- CROP LOGIC ---
+  function openCropModal(index) {
+    currentCropIndex = index;
+    const imageData = imageState[index];
+    imageToCrop.src = imageData.originalSrc;
+    
+    cropModal.classList.add('flex');
+
+    setTimeout(() => {
+        if (cropperInstance) cropperInstance.destroy();
+        
+        const cropperOptions = {
+            aspectRatio: NaN,
+            viewMode: 1,
+            background: false,
+            ready: function () {
+                // If it's the first time cropping (no saved data), select the whole image.
+                if (!imageData.cropData) {
+                    const imgData = cropperInstance.getImageData();
+                    cropperInstance.setCropBoxData({
+                        left: 0,
+                        top: 0,
+                        width: imgData.naturalWidth,
+                        height: imgData.naturalHeight
+                    });
+                }
+            }
+        };
+
+        // If we have previously saved crop data, pass it during initialization.
+        if (imageData.cropData) {
+            cropperOptions.data = imageData.cropData;
+        }
+
+        cropperInstance = new Cropper(imageToCrop, cropperOptions);
+    }, 100);
+  }
+
+  function closeCropModal() {
+    if (cropperInstance) cropperInstance.destroy();
+    cropperInstance = null;
+    cropModal.classList.remove('flex');
+  }
+
+  cancelCropBtn.addEventListener('click', closeCropModal);
+
+  saveCropBtn.addEventListener('click', () => {
+    if (!cropperInstance || currentCropIndex < 0) return;
+    
+    // Save the current crop box data for later.
+    imageState[currentCropIndex].cropData = cropperInstance.getData(true);
+    
+    const canvas = cropperInstance.getCroppedCanvas({ imageSmoothingQuality: 'high' });
+    const croppedSrc = canvas.toDataURL('image/jpeg', 0.9);
+    
+    // Update state and thumbnail
+    imageState[currentCropIndex].croppedSrc = croppedSrc;
+    const thumbImg = document.querySelector(`[data-index='${currentCropIndex}'] img`);
+    if (thumbImg) thumbImg.src = croppedSrc;
+
+    closeCropModal();
+  });
+
+  // --- FOLDER INPUT LOGIC ---
+  folderInput.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files)
+      .filter(f => f.type.startsWith('image/'))
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+    if (files.length === 0) {
+        imageReviewContainer.classList.add('hidden');
+        return;
+    }
+
+    updateStatus(`Reading ${files.length} images...`);
+    
+    imageState = await Promise.all(files.map(file => new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const src = event.target.result;
+            resolve({ file, originalSrc: src, croppedSrc: src, name: file.name, cropData: null });
+        };
+        reader.readAsDataURL(file);
+    })));
+
+    imageThumbnailGrid.innerHTML = ''; // Clear previous thumbnails
+    imageState.forEach((imgData, index) => {
+        const thumbContainer = document.createElement('div');
+        thumbContainer.className = 'relative group';
+        thumbContainer.dataset.index = index;
+
+        const img = document.createElement('img');
+        img.src = imgData.originalSrc;
+        img.className = 'w-full h-full object-cover rounded-md aspect-square';
+
+        const overlay = document.createElement('div');
+        overlay.className = 'absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center transition-opacity rounded-md';
+        
+        const button = document.createElement('button');
+        button.textContent = 'Crop';
+        button.className = 'text-white text-sm bg-blue-600 px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity';
+        button.onclick = () => openCropModal(index);
+
+        overlay.appendChild(button);
+        thumbContainer.appendChild(img);
+        thumbContainer.appendChild(overlay);
+        imageThumbnailGrid.appendChild(thumbContainer);
+    });
+
+    imageReviewContainer.classList.remove('hidden');
+    updateStatus(`Ready. ${files.length} images loaded. Crop them or proceed to recording.`);
+  });
+
+
   // --- MAIN LOGIC ---
   startBtn.addEventListener('click', async () => {
     startBtn.disabled = true;
     stopBtn.disabled = false;
 
-    if (!folderInput.files.length) {
+    if (imageState.length === 0) {
       updateStatus("ERROR: Please select an images folder first.", true);
       startBtn.disabled = false;
       stopBtn.disabled = true;
       return;
     }
     
-    updateStatus("1. Reading images from folder...");
-    const imageFiles = Array.from(folderInput.files).filter(f => f.type.startsWith('image/')).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-    const images = await Promise.all(imageFiles.map(f => new Promise((res, rej) => {
+    updateStatus("1. Loading cropped images...");
+    const images = await Promise.all(imageState.map(imgData => new Promise((res, rej) => {
         const img = new Image();
         img.onload = () => res(img);
         img.onerror = rej;
-        img.src = URL.createObjectURL(f);
+        img.src = imgData.croppedSrc; // Use the cropped source
     })));
 
-    if (images.length === 0) {
-        updateStatus("ERROR: No valid images found in the selected folder.", true);
-        startBtn.disabled = false;
-        stopBtn.disabled = true;
-        return;
-    }
     updateStatus(`Found ${images.length} images. Preparing videos...`);
 
     const secPer = Math.max(1, Number(secPerInput.value) || 3);
@@ -324,19 +472,38 @@
                 const step = now => {
                     const elapsed = (now - start) / 1000;
                     if (stopped || elapsed > item.duration) return resolve();
+                    
                     drawTemplateText(octx, OUT_W, OUT_H, branchText.value, satsangPlaceText.value, templateBgColor.value);
+                    
                     const progress = Math.min(1, elapsed / item.duration);
-                    const scale = 1 + 0.10 * progress;
+                    const zoom = 1 + 0.10 * progress;
                     const img = item.obj;
                     const imgContainerY = OUT_H * 0.32, imgContainerH = OUT_H * 0.36;
-                    const imgScale = OUT_W / img.width;
-                    const currentW = img.width * imgScale * scale, currentH = img.height * imgScale * scale;
+                    const imgContainerW = OUT_W;
+                    
+                    const containerAspectRatio = imgContainerW / imgContainerH;
+                    const imageAspectRatio = img.width / img.height;
+
+                    let scale;
+                    if (imageAspectRatio > containerAspectRatio) {
+                        scale = imgContainerH / img.height;
+                    } else {
+                        scale = imgContainerW / img.width;
+                    }
+                    scale *= zoom;
+
+                    const drawWidth = img.width * scale;
+                    const drawHeight = img.height * scale;
+                    const dx = (imgContainerW - drawWidth) / 2;
+                    const dy = imgContainerY + (imgContainerH - drawHeight) / 2;
+
                     octx.save();
                     octx.beginPath();
-                    octx.rect(0, imgContainerY, OUT_W, imgContainerH);
+                    octx.rect(0, imgContainerY, imgContainerW, imgContainerH);
                     octx.clip();
-                    octx.drawImage(img, (OUT_W - currentW) / 2, imgContainerY + (imgContainerH - currentH) / 2, currentW, currentH);
+                    octx.drawImage(img, dx, dy, drawWidth, drawHeight);
                     octx.restore();
+
                     drawPreview();
                     requestAnimationFrame(step);
                 };
