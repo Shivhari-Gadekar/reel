@@ -1,526 +1,672 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reel Builder: Ramdwara</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-  <style>
-    input[type="file"]::file-selector-button { font-weight: 500; }
-    input[type=number]::-webkit-inner-spin-button,
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    input[type=number] { -moz-appearance: textfield; }
-    /* Styles for the crop modal */
-    #cropModal { display: none; }
-    #cropModal.flex { display: flex; }
-    /* Ensure cropper image is not tiny before it loads */
-    #imageToCrop { max-width: 80vw; max-height: 70vh; }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reel Builder: Ramdwara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <style>
+        input[type="file"]::file-selector-button {
+            font-weight: 500;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Styles for the crop modal */
+        #cropModal {
+            display: none;
+        }
+
+        #cropModal.flex {
+            display: flex;
+        }
+
+        /* Ensure cropper image is not tiny before it loads */
+        #imageToCrop {
+            max-width: 80vw;
+            max-height: 70vh;
+        }
+    </style>
 </head>
-<body class="bg-slate-100 font-sans antialiased text-slate-800 lg:flex lg:items-center lg:justify-center lg:min-h-screen">
-  <div class="container mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
 
-    <main class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-      
-      <div class="lg:col-span-3 flex flex-col gap-6">
-        
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <label for="folderInput" class="block text-lg font-semibold text-slate-700">1. Select Images Folder</label>
-          <p class="text-sm text-slate-500 mb-4">Images will be sorted alphabetically by filename.</p>
-          <input id="folderInput" type="file" webkitdirectory directory multiple class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"/>
-        </div>
+<body
+    class="bg-slate-100 font-sans antialiased text-slate-800 lg:flex lg:items-center lg:justify-center lg:min-h-screen">
+    <div class="container mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
 
-        <!-- NEW: Image Review and Crop Section -->
-        <div id="imageReviewContainer" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hidden">
-          <h2 class="text-lg font-semibold text-slate-700 mb-4">2. Review & Crop Images</h2>
-          <div id="imageThumbnailGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 max-h-96 overflow-y-auto p-2 bg-slate-50 rounded-lg">
-            <!-- Image thumbnails will be injected here -->
-          </div>
-        </div>
+        <main class="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-4">3. Add Intro & Outro (Optional)</h2>
-          <p class="text-sm text-slate-500 mb-4">Uses default videos from the repository if none are selected.</p>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label for="introFile" class="block text-sm font-medium text-slate-600 mb-2">Intro Video</label>
-              <input id="introFile" type="file" accept="video/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"/>
+            <div class="lg:col-span-3 flex flex-col gap-6">
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <label for="folderInput" class="block text-lg font-semibold text-slate-700">1. Select Images
+                        Folder</label>
+                    <p class="text-sm text-slate-500 mb-4">Images will be sorted alphabetically by filename.</p>
+                    <input id="folderInput" type="file" webkitdirectory directory multiple
+                        class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                </div>
+
+                <!-- NEW: Image Review and Crop Section -->
+                <div id="imageReviewContainer" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hidden">
+                    <h2 class="text-lg font-semibold text-slate-700 mb-4">2. Review & Crop Images</h2>
+                    <div id="imageThumbnailGrid"
+                        class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 max-h-96 overflow-y-auto p-2 bg-slate-50 rounded-lg">
+                        <!-- Image thumbnails will be injected here -->
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-semibold text-slate-700 mb-4">3. Add Intro & Outro (Optional)</h2>
+                    <p class="text-sm text-slate-500 mb-4">Uses default videos from the repository if none are selected.
+                    </p>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="introFile" class="block text-sm font-medium text-slate-600 mb-2">Intro
+                                Video</label>
+                            <input id="introFile" type="file" accept="video/*"
+                                class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer" />
+                        </div>
+                        <div>
+                            <label for="outroFile" class="block text-sm font-medium text-slate-600 mb-2">Outro
+                                Video</label>
+                            <input id="outroFile" type="file" accept="video/*"
+                                class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-semibold text-slate-700 mb-4">4. Image Template</h2>
+                    <div class="grid sm:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <input id="branchText" type="text" placeholder="Ramdwara Branch (e.g., Pune)"
+                                class="p-1 ps-2 w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <input id="satsangPlaceText" type="text" placeholder="Satsang Place (e.g., Alandi)"
+                                class="p-1 ps-2 w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <div class="flex items-center gap-4">
+                                <label for="templateBgColor"
+                                    class="text-sm font-medium text-slate-600">Background:</label>
+                                <input id="templateBgColor" type="color" value="#FEF2F2"
+                                    class="h-10 w-16 rounded-md border-slate-300 cursor-pointer">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-2">Template Preview:</label>
+                            <canvas id="templatePreviewCanvas"
+                                class="w-full aspect-[9/16] bg-slate-200 rounded-lg border border-black"></canvas>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <div>
-              <label for="outroFile" class="block text-sm font-medium text-slate-600 mb-2">Outro Video</label>
-              <input id="outroFile" type="file" accept="video/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"/>
-            </div>
-          </div>
-        </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-4">4. Image Template</h2>
-          <div class="grid sm:grid-cols-2 gap-6">
-            <div class="space-y-4">
-              <input id="branchText" type="text" placeholder="Ramdwara Branch (e.g., Pune)" class="p-1 ps-2 w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-              <input id="satsangPlaceText" type="text" placeholder="Satsang Place (e.g., Alandi)" class="p-1 ps-2 w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-              <div class="flex items-center gap-4">
-                <label for="templateBgColor" class="text-sm font-medium text-slate-600">Background:</label>
-                <input id="templateBgColor" type="color" value="#FEF2F2" class="h-10 w-16 rounded-md border-slate-300 cursor-pointer">
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-600 mb-2">Template Preview:</label>
-              <canvas id="templatePreviewCanvas" class="w-full aspect-[9/16] bg-slate-200 rounded-lg border border-black"></canvas>
-            </div>
-          </div>
-        </div>
+            <div class="lg:col-span-2 flex flex-col items-center lg:items-start">
+                <h2 class="text-lg font-semibold text-slate-700 mb-4 self-center lg:self-start">Preview</h2>
 
-      </div>
+                <div
+                    class="relative mx-auto border-gray-900 bg-gray-900 border-[8px] rounded-[2.5rem] h-[512px] w-[288px] shadow-xl">
+                    <div
+                        class="w-[80px] h-[14px] bg-gray-900 top-0 rounded-b-[1rem] left-1/2 -translate-x-1/2 absolute">
+                    </div>
+                    <div id="preview" class="rounded-[2rem] overflow-hidden w-full h-full bg-black"></div>
+                </div>
 
-      <div class="lg:col-span-2 flex flex-col items-center lg:items-start">
-        <h2 class="text-lg font-semibold text-slate-700 mb-4 self-center lg:self-start">Preview</h2>
-        
-        <div class="relative mx-auto border-gray-900 bg-gray-900 border-[8px] rounded-[2.5rem] h-[512px] w-[288px] shadow-xl">
-            <div class="w-[80px] h-[14px] bg-gray-900 top-0 rounded-b-[1rem] left-1/2 -translate-x-1/2 absolute"></div>
-            <div id="preview" class="rounded-[2rem] overflow-hidden w-full h-full bg-black"></div>
-        </div>
-        
-        <div id="status" class="w-full max-w-md mt-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 min-h-[100px] text-sm">
-          Ready to build your reel.
-        </div>
-        
-        <div class="w-full max-w-md mt-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h2 class="text-lg font-semibold text-slate-700 mb-4">5. Audio & Settings</h2>
-          <div class="space-y-4">
-            <div>
-              <label for="audioFile" class="block text-sm font-medium text-slate-600 mb-2">Background Audio</label>
-              <input id="audioFile" type="file" accept="audio/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"/>
+                <div id="status"
+                    class="w-full max-w-md mt-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200 min-h-[100px] text-sm">
+                    Ready to build your reel.
+                </div>
+
+                <div class="w-full max-w-md mt-6 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-semibold text-slate-700 mb-4">5. Audio & Settings</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="audioFile" class="block text-sm font-medium text-slate-600 mb-2">Background
+                                Audio</label>
+                            <input id="audioFile" type="file" accept="audio/*"
+                                class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100 cursor-pointer" />
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label for="secPer" class="text-sm font-medium text-slate-600">Seconds per image:</label>
+                            <input id="secPer" type="number" value="5" min="1"
+                                class="w-16 text-center border-slate-300 border py-1 shadow-sm focus:border-blue-500 focus:ring-blue-500 rounded-md" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full max-w-md mt-6 flex gap-4">
+                    <button id="startBtn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:bg-slate-400">Start
+                        & Record</button>
+                    <button id="stopBtn" disabled
+                        class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:bg-slate-400">Stop</button>
+                </div>
             </div>
-            <div class="flex items-center justify-between">
-              <label for="secPer" class="text-sm font-medium text-slate-600">Seconds per image:</label>
-              <input id="secPer" type="number" value="5" min="1" class="w-16 text-center border-slate-300 border py-1 shadow-sm focus:border-blue-500 focus:ring-blue-500 rounded-md" />
-            </div>
-          </div>
-        </div>
-
-        <div class="w-full max-w-md mt-6 flex gap-4">
-          <button id="startBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:bg-slate-400">Start & Record</button>
-          <button id="stopBtn" disabled class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:bg-slate-400">Stop</button>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- NEW: Crop Modal -->
-  <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center p-4">
-    <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl w-full">
-      <h2 class="text-xl font-semibold mb-4">Crop Image</h2>
-      <div>
-        <img id="imageToCrop" src="" alt="Image to crop">
-      </div>
-      <div class="mt-6 flex justify-end gap-4">
-        <button id="cancelCropBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
-        <button id="saveCropBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Save Crop</button>
-      </div>
+        </main>
     </div>
-  </div>
 
-<script>
-(async function(){
-  // --- CONFIGURATION ---
-  const OUT_W = 1080, OUT_H = 1920;
-  const PREVIEW_W = 272, PREVIEW_H = 496;
-  const FPS = 30;
-  const DEFAULT_INTRO_URL = './intro.mp4';
-  const DEFAULT_OUTRO_URL = './outro.mp4';
+    <!-- NEW: Crop Modal -->
+    <div id="cropModal" class="fixed inset-0 bg-black bg-opacity-75 items-center justify-center p-4">
+        <div class="bg-white p-6 rounded-xl shadow-lg max-w-4xl w-full">
+            <h2 id="cropModalTitle" class="text-xl font-semibold mb-4">Crop Media</h2>
 
-  // --- GET ELEMENTS ---
-  const folderInput = document.getElementById('folderInput');
-  const imageReviewContainer = document.getElementById('imageReviewContainer');
-  const imageThumbnailGrid = document.getElementById('imageThumbnailGrid');
-  const introFile = document.getElementById('introFile');
-  const outroFile = document.getElementById('outroFile');
-  const audioFile = document.getElementById('audioFile');
-  const secPerInput = document.getElementById('secPer');
-  const startBtn = document.getElementById('startBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  const preview = document.getElementById('preview');
-  const status = document.getElementById('status');
-  const branchText = document.getElementById('branchText');
-  const satsangPlaceText = document.getElementById('satsangPlaceText');
-  const templateBgColor = document.getElementById('templateBgColor');
-  const templatePreviewCanvas = document.getElementById('templatePreviewCanvas');
-  const templatePreviewCtx = templatePreviewCanvas.getContext('2d');
-  
-  // --- CROP MODAL ELEMENTS ---
-  const cropModal = document.getElementById('cropModal');
-  const imageToCrop = document.getElementById('imageToCrop');
-  const cancelCropBtn = document.getElementById('cancelCropBtn');
-  const saveCropBtn = document.getElementById('saveCropBtn');
+            <!-- Image or Video Frame -->
+            <div>
+                <img id="imageToCrop" src="" alt="Media to crop">
+            </div>
 
-  // --- STATE MANAGEMENT ---
-  let imageState = []; // To hold { file, originalSrc, croppedSrc, name, cropData }
-  let cropperInstance = null;
-  let currentCropIndex = -1;
-  
-  // --- PREVIEW & OFFSCREEN CANVASES ---
-  const previewCanvas = document.createElement('canvas');
-  previewCanvas.width = PREVIEW_W;
-  previewCanvas.height = PREVIEW_H;
-  preview.appendChild(previewCanvas);
-  const pctx = previewCanvas.getContext('2d');
-  const offscreenCanvas = document.createElement('canvas');
-  offscreenCanvas.width = OUT_W;
-  offscreenCanvas.height = OUT_H;
-  const octx = offscreenCanvas.getContext('2d');
+            <!-- Video Trim Controls -->
+            <div id="trimControls" class="mt-6 hidden">
+                <h3 class="text-md font-semibold mb-2">Trim Video</h3>
+                <div class="flex items-center gap-2 mb-2">
+                    <label class="text-sm w-24">Start Time:</label>
+                    <input id="trimStart" type="range" min="0" max="100" step="0.1" value="0" class="w-full">
+                    <span id="trimStartLabel" class="text-xs w-12 text-right">0s</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm w-24">End Time:</label>
+                    <input id="trimEnd" type="range" min="0" max="100" step="0.1" value="100" class="w-full">
+                    <span id="trimEndLabel" class="text-xs w-12 text-right">0s</span>
+                </div>
+            </div>
 
-  // --- HELPER FUNCTIONS ---
-  const updateStatus = (msg, isError = false) => {
-    status.innerHTML = msg;
-    status.className = status.className.replace(/text-(red|green)-700/, '');
-    if (isError) status.classList.add('text-red-700');
-  };
+            <div class="mt-6 flex justify-end gap-4">
+                <button id="cancelCropBtn"
+                    class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-6 rounded-lg">Cancel</button>
+                <button id="saveCropBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg">Save</button>
+            </div>
+        </div>
+    </div>
 
-  function drawTemplateText(ctx, width, height, branch, satsang, bg) {
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, width, height);
-    ctx.fillStyle = '#1f2937';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = `normal ${height * 0.03}px sans-serif`;
-    ctx.fillText("|| Satswaroop Ram ||", width / 2, height * 0.05);
-    ctx.font = `bold ${height * 0.04}px sans-serif`;
-    ctx.fillText("Directed by Ramdwara", width / 2, height * 0.12);
-    ctx.fillText("(Jagatpal) Jalgaon,", width / 2, height * 0.18);
-    ctx.fillText("Maharashtra", width / 2, height * 0.24);
-    ctx.font = `bold ${height * 0.03}px sans-serif`;
-    ctx.fillText("CHANT RAM NAAM,", width / 2, height * 0.75);
-    ctx.fillText("ENLIGHTEN YOUR FUTURE", width / 2, height * 0.81);
-    ctx.font = `bold ${height * 0.025}px sans-serif`;
-    ctx.fillText(`Ramdwara Branch : ${branch}`, width / 2, height * 0.90);
-    ctx.fillText(`Satsang Place : ${satsang}`, width / 2, height * 0.95);
-  }
 
-  function updateTemplatePreview() {
-    const rect = templatePreviewCanvas.getBoundingClientRect();
-    templatePreviewCanvas.width = rect.width * 2;
-    templatePreviewCanvas.height = rect.height * 2;
-    const { width, height } = templatePreviewCanvas;
-    drawTemplateText(templatePreviewCtx, width, height, branchText.value, satsangPlaceText.value, templateBgColor.value);
-    templatePreviewCtx.fillStyle = 'rgba(0,0,0,0.1)';
-    templatePreviewCtx.fillRect(0, height * 0.32, width, height * 0.36);
-    templatePreviewCtx.fillStyle = '#1f2937';
-    templatePreviewCtx.font = `normal ${height * 0.03}px sans-serif`;
-    templatePreviewCtx.fillText("Image appears here", width / 2, height * 0.5);
-  }
-  
-  [branchText, satsangPlaceText, templateBgColor].forEach(el => el.addEventListener('input', updateTemplatePreview));
-  setTimeout(updateTemplatePreview, 100);
+    <script>
+        (async function () {
+            // --- CONFIGURATION ---
+            const OUT_W = 1080, OUT_H = 1920;
+            const PREVIEW_W = 272, PREVIEW_H = 496;
+            const FPS = 30;
+            const DEFAULT_INTRO_URL = './intro.mp4';
+            const DEFAULT_OUTRO_URL = './outro.mp4';
 
-  function makeVideoElement(source) {
-    const v = document.createElement('video');
-    v.muted = true;
-    v.playsInline = true;
-    v.preload = 'auto';
-    v.crossOrigin = 'anonymous';
-    v.src = (source instanceof File) ? URL.createObjectURL(source) : source;
-    return v;
-  }
+            // --- GET ELEMENTS ---
+            const folderInput = document.getElementById('folderInput');
+            const imageReviewContainer = document.getElementById('imageReviewContainer');
+            const imageThumbnailGrid = document.getElementById('imageThumbnailGrid');
+            const introFile = document.getElementById('introFile');
+            const outroFile = document.getElementById('outroFile');
+            const audioFile = document.getElementById('audioFile');
+            const secPerInput = document.getElementById('secPer');
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const preview = document.getElementById('preview');
+            const status = document.getElementById('status');
+            const branchText = document.getElementById('branchText');
+            const satsangPlaceText = document.getElementById('satsangPlaceText');
+            const templateBgColor = document.getElementById('templateBgColor');
+            const templatePreviewCanvas = document.getElementById('templatePreviewCanvas');
+            const templatePreviewCtx = templatePreviewCanvas.getContext('2d');
 
-  // --- CROP LOGIC ---
-  function openCropModal(index) {
-    currentCropIndex = index;
-    const imageData = imageState[index];
-    imageToCrop.src = imageData.originalSrc;
-    
-    cropModal.classList.add('flex');
+            // --- CROP MODAL ELEMENTS ---
+            const cropModal = document.getElementById('cropModal');
+            const imageToCrop = document.getElementById('imageToCrop');
+            const cancelCropBtn = document.getElementById('cancelCropBtn');
+            const saveCropBtn = document.getElementById('saveCropBtn');
 
-    setTimeout(() => {
-        if (cropperInstance) cropperInstance.destroy();
-        
-        const cropperOptions = {
-            aspectRatio: NaN,
-            viewMode: 1,
-            background: false,
-            ready: function () {
-                // If it's the first time cropping (no saved data), select the whole image.
-                if (!imageData.cropData) {
-                    const imgData = cropperInstance.getImageData();
-                    cropperInstance.setCropBoxData({
-                        left: 0,
-                        top: 0,
-                        width: imgData.naturalWidth,
-                        height: imgData.naturalHeight
-                    });
-                }
+            // --- STATE MANAGEMENT ---
+            let imageState = []; // To hold { file, originalSrc, croppedSrc, name, cropData }
+            let cropperInstance = null;
+            let currentCropIndex = -1;
+
+            // --- PREVIEW & OFFSCREEN CANVASES ---
+            const previewCanvas = document.createElement('canvas');
+            previewCanvas.width = PREVIEW_W;
+            previewCanvas.height = PREVIEW_H;
+            preview.appendChild(previewCanvas);
+            const pctx = previewCanvas.getContext('2d');
+            const offscreenCanvas = document.createElement('canvas');
+            offscreenCanvas.width = OUT_W;
+            offscreenCanvas.height = OUT_H;
+            const octx = offscreenCanvas.getContext('2d');
+
+            // --- HELPER FUNCTIONS ---
+            const updateStatus = (msg, isError = false) => {
+                status.innerHTML = msg;
+                status.className = status.className.replace(/text-(red|green)-700/, '');
+                if (isError) status.classList.add('text-red-700');
+            };
+
+
+
+            function drawTemplateText(ctx, width, height, branch, satsang, bg) {
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, width, height);
+                ctx.fillStyle = '#1f2937';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = `normal ${height * 0.03}px sans-serif`;
+                ctx.fillText("|| Satswaroop Ram ||", width / 2, height * 0.05);
+                ctx.font = `bold ${height * 0.04}px sans-serif`;
+                ctx.fillText("Directed by Ramdwara", width / 2, height * 0.12);
+                ctx.fillText("(Jagatpal) Jalgaon,", width / 2, height * 0.18);
+                ctx.fillText("Maharashtra", width / 2, height * 0.24);
+                ctx.font = `bold ${height * 0.03}px sans-serif`;
+                ctx.fillText("CHANT RAM NAAM,", width / 2, height * 0.75);
+                ctx.fillText("ENLIGHTEN YOUR FUTURE", width / 2, height * 0.81);
+                ctx.font = `bold ${height * 0.025}px sans-serif`;
+                ctx.fillText(`Ramdwara Branch : ${branch}`, width / 2, height * 0.90);
+                ctx.fillText(`Satsang Place : ${satsang}`, width / 2, height * 0.95);
             }
-        };
 
-        // If we have previously saved crop data, pass it during initialization.
-        if (imageData.cropData) {
-            cropperOptions.data = imageData.cropData;
-        }
+            function updateTemplatePreview() {
+                const rect = templatePreviewCanvas.getBoundingClientRect();
+                templatePreviewCanvas.width = rect.width * 2;
+                templatePreviewCanvas.height = rect.height * 2;
+                const { width, height } = templatePreviewCanvas;
+                drawTemplateText(templatePreviewCtx, width, height, branchText.value, satsangPlaceText.value, templateBgColor.value);
+                templatePreviewCtx.fillStyle = 'rgba(0,0,0,0.1)';
+                templatePreviewCtx.fillRect(0, height * 0.32, width, height * 0.36);
+                templatePreviewCtx.fillStyle = '#1f2937';
+                templatePreviewCtx.font = `normal ${height * 0.03}px sans-serif`;
+                templatePreviewCtx.fillText("Image appears here", width / 2, height * 0.5);
+            }
 
-        cropperInstance = new Cropper(imageToCrop, cropperOptions);
-    }, 100);
-  }
+            [branchText, satsangPlaceText, templateBgColor].forEach(el => el.addEventListener('input', updateTemplatePreview));
+            setTimeout(updateTemplatePreview, 100);
 
-  function closeCropModal() {
-    if (cropperInstance) cropperInstance.destroy();
-    cropperInstance = null;
-    cropModal.classList.remove('flex');
-  }
+            function makeVideoElement(source) {
+                const v = document.createElement('video');
+                v.muted = true;
+                v.playsInline = true;
+                v.preload = 'auto';
+                v.crossOrigin = 'anonymous';
+                v.src = (source instanceof File) ? URL.createObjectURL(source) : source;
+                return v;
+            }
 
-  cancelCropBtn.addEventListener('click', closeCropModal);
+            // --- CROP LOGIC ---
+            function openCropModal(index) {
+                currentCropIndex = index;
+                const media = imageState[index];
+                cropModal.classList.add('flex');
+                const isVideo = media.type === 'video';
 
-  saveCropBtn.addEventListener('click', () => {
-    if (!cropperInstance || currentCropIndex < 0) return;
-    
-    // Save the current crop box data for later.
-    imageState[currentCropIndex].cropData = cropperInstance.getData(true);
-    
-    const canvas = cropperInstance.getCroppedCanvas({ imageSmoothingQuality: 'high' });
-    const croppedSrc = canvas.toDataURL('image/jpeg', 0.9);
-    
-    // Update state and thumbnail
-    imageState[currentCropIndex].croppedSrc = croppedSrc;
-    const thumbImg = document.querySelector(`[data-index='${currentCropIndex}'] img`);
-    if (thumbImg) thumbImg.src = croppedSrc;
+                // Set modal title
+                document.getElementById('cropModalTitle').textContent = isVideo ? 'Crop & Trim Video' : 'Crop Image';
 
-    closeCropModal();
-  });
+                // Hide any existing cropper
+                if (cropperInstance) cropperInstance.destroy();
+                cropperInstance = null;
 
-  // --- FOLDER INPUT LOGIC ---
-  folderInput.addEventListener('change', async (e) => {
-    const files = Array.from(e.target.files)
-      .filter(f => f.type.startsWith('image/'))
-      .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+                // Show the image frame (poster for video)
+                imageToCrop.src = isVideo ? media.posterSrc : media.originalSrc;
 
-    if (files.length === 0) {
-        imageReviewContainer.classList.add('hidden');
-        return;
-    }
+                // Handle trim controls
+                const trimControls = document.getElementById('trimControls');
+                const trimStart = document.getElementById('trimStart');
+                const trimEnd = document.getElementById('trimEnd');
+                const trimStartLabel = document.getElementById('trimStartLabel');
+                const trimEndLabel = document.getElementById('trimEndLabel');
 
-    updateStatus(`Reading ${files.length} images...`);
-    
-    imageState = await Promise.all(files.map(file => new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const src = event.target.result;
-            resolve({ file, originalSrc: src, croppedSrc: src, name: file.name, cropData: null });
-        };
-        reader.readAsDataURL(file);
-    })));
+                if (isVideo) {
+                    trimControls.classList.remove('hidden');
 
-    imageThumbnailGrid.innerHTML = ''; // Clear previous thumbnails
-    imageState.forEach((imgData, index) => {
-        const thumbContainer = document.createElement('div');
-        thumbContainer.className = 'relative group';
-        thumbContainer.dataset.index = index;
+                    // Create a temp video to get duration
+                    const tempVid = document.createElement('video');
+                    tempVid.src = media.originalSrc;
+                    tempVid.addEventListener('loadedmetadata', () => {
+                        const dur = tempVid.duration;
+                        trimStart.max = dur;
+                        trimEnd.max = dur;
+                        const start = media.trim.start || 0;
+                        const end = media.trim.end || dur;
+                        trimStart.value = start;
+                        trimEnd.value = end;
+                        trimStartLabel.textContent = `${start.toFixed(1)}s`;
+                        trimEndLabel.textContent = `${end.toFixed(1)}s`;
+                    });
 
-        const img = document.createElement('img');
-        img.src = imgData.originalSrc;
-        img.className = 'w-full h-full object-cover rounded-md aspect-square';
+                    // Update label dynamically
+                    trimStart.oninput = () => {
+                        if (Number(trimStart.value) >= Number(trimEnd.value) - 0.2)
+                            trimStart.value = Number(trimEnd.value) - 0.2;
+                        trimStartLabel.textContent = `${Number(trimStart.value).toFixed(1)}s`;
+                    };
+                    trimEnd.oninput = () => {
+                        if (Number(trimEnd.value) <= Number(trimStart.value) + 0.2)
+                            trimEnd.value = Number(trimStart.value) + 0.2;
+                        trimEndLabel.textContent = `${Number(trimEnd.value).toFixed(1)}s`;
+                    };
+                } else {
+                    trimControls.classList.add('hidden');
+                }
 
-        const overlay = document.createElement('div');
-        overlay.className = 'absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center transition-opacity rounded-md';
-        
-        const button = document.createElement('button');
-        button.textContent = 'Crop';
-        button.className = 'text-white text-sm bg-blue-600 px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity';
-        button.onclick = () => openCropModal(index);
+                setTimeout(() => {
+                    const cropperOptions = {
+                        aspectRatio: NaN,
+                        viewMode: 1,
+                        background: false,
+                        data: media.cropData || undefined
+                    };
+                    cropperInstance = new Cropper(imageToCrop, cropperOptions);
+                }, 100);
+            }
 
-        overlay.appendChild(button);
-        thumbContainer.appendChild(img);
-        thumbContainer.appendChild(overlay);
-        imageThumbnailGrid.appendChild(thumbContainer);
-    });
+            function closeCropModal() {
+                if (cropperInstance) cropperInstance.destroy();
+                cropperInstance = null;
+                cropModal.classList.remove('flex');
+            }
 
-    imageReviewContainer.classList.remove('hidden');
-    updateStatus(`Ready. ${files.length} images loaded. Crop them or proceed to recording.`);
-  });
+            cancelCropBtn.addEventListener('click', closeCropModal);
 
+            saveCropBtn.addEventListener('click', () => {
+                if (imageState[currentCropIndex].type === 'video') {
+                    const trimStart = Number(document.getElementById('trimStart').value);
+                    const trimEnd = Number(document.getElementById('trimEnd').value);
+                    imageState[currentCropIndex].trim = { start: trimStart, end: trimEnd };
+                }
 
-  // --- MAIN LOGIC ---
-  startBtn.addEventListener('click', async () => {
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
+                if (!cropperInstance || currentCropIndex < 0) return;
 
-    if (imageState.length === 0) {
-      updateStatus("ERROR: Please select an images folder first.", true);
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
-      return;
-    }
-    
-    updateStatus("1. Loading cropped images...");
-    const images = await Promise.all(imageState.map(imgData => new Promise((res, rej) => {
-        const img = new Image();
-        img.onload = () => res(img);
-        img.onerror = rej;
-        img.src = imgData.croppedSrc; // Use the cropped source
-    })));
+                // Save the current crop box data for later.
+                imageState[currentCropIndex].cropData = cropperInstance.getData(true);
 
-    updateStatus(`Found ${images.length} images. Preparing videos...`);
+                const canvas = cropperInstance.getCroppedCanvas({ imageSmoothingQuality: 'high' });
+                const croppedSrc = canvas.toDataURL('image/jpeg', 0.9);
 
-    const secPer = Math.max(1, Number(secPerInput.value) || 5);
-    const seq = [];
+                // Update state and thumbnail
+                imageState[currentCropIndex].croppedSrc = croppedSrc;
+                const thumbImg = document.querySelector(`[data-index='${currentCropIndex}'] img`);
+                if (thumbImg) thumbImg.src = croppedSrc;
 
-    // --- Video Loading Logic ---
-    const canLoadVideo = (video, name) => new Promise(resolve => {
-        video.addEventListener('canplay', () => {
-            updateStatus(`${name} video loaded successfully.`);
-            resolve(video);
-        });
-        video.addEventListener('error', (e) => {
-            updateStatus(`Warning: Could not load ${name} video. Check file name and location.`, true);
-            resolve(null);
-        });
-        setTimeout(() => resolve(null), 4000); // 4 second timeout
-    });
-
-    const introSource = introFile.files.length ? introFile.files[0] : DEFAULT_INTRO_URL;
-    updateStatus("2. Loading Intro Video...");
-    const introVid = await canLoadVideo(makeVideoElement(introSource), "Intro");
-    if (introVid) seq.push({ type: 'video', obj: introVid });
-    
-    images.forEach(img => seq.push({ type: 'image', obj: img, duration: secPer }));
-    
-    const outroSource = outroFile.files.length ? outroFile.files[0] : DEFAULT_OUTRO_URL;
-    updateStatus("3. Loading Outro Video...");
-    const outroVid = await canLoadVideo(makeVideoElement(outroSource), "Outro");
-    if (outroVid) seq.push({ type: 'video', obj: outroVid });
-
-    // --- Audio Loading Logic ---
-    let audioContext, bgAudioBuffer;
-    if (audioFile.files.length) {
-        updateStatus("4. Loading audio file...");
-        try {
-            audioContext = new AudioContext();
-            const arrayBuffer = await audioFile.files[0].arrayBuffer();
-            bgAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-            updateStatus("Audio loaded successfully.");
-        } catch(e) {
-            updateStatus("ERROR: Could not process audio file.", true);
-            startBtn.disabled = false; stopBtn.disabled = true; return;
-        }
-    }
-
-    // --- Media Recorder Setup ---
-    updateStatus("5. Setting up recorder...");
-    const canvasStream = offscreenCanvas.captureStream(FPS);
-    const audioDestination = audioContext ? audioContext.createMediaStreamDestination() : null;
-    const finalStream = new MediaStream([
-        ...canvasStream.getVideoTracks(),
-        ...(audioDestination ? audioDestination.stream.getAudioTracks() : [])
-    ]);
-    
-    if (!MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
-        updateStatus("ERROR: Browser not supported.", true);
-        startBtn.disabled = false; stopBtn.disabled = true; return;
-    }
-    const recorder = new MediaRecorder(finalStream, { mimeType: 'video/webm;codecs=vp9,opus' });
-    const recordedBlobs = [];
-    recorder.ondataavailable = e => { if (e.data && e.data.size) recordedBlobs.push(e.data); };
-    recorder.onstop = () => {
-      const blob = new Blob(recordedBlobs, { type: 'video/webm' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `reel.webm`;
-      a.className = 'inline-block mt-4 px-5 py-2.5 bg-green-600 text-white font-medium uppercase rounded-lg shadow-md hover:bg-green-700';
-      a.textContent = `Download Reel`;
-      updateStatus('Recording finished. Click to download.<br>');
-      status.appendChild(a);
-    };
-
-    // --- Start Recording & Rendering ---
-    recorder.start();
-    updateStatus("✅ Recording started...");
-    if (bgAudioBuffer) {
-        const bgAudioSourceNode = audioContext.createBufferSource();
-        bgAudioSourceNode.buffer = bgAudioBuffer;
-        bgAudioSourceNode.connect(audioDestination);
-        bgAudioSourceNode.connect(audioContext.destination);
-        bgAudioSourceNode.start(0);
-    }
-
-    let stopped = false;
-    stopBtn.onclick = () => { stopped = true; };
-
-    const drawPreview = () => pctx.drawImage(offscreenCanvas, 0, 0, PREVIEW_W, PREVIEW_H);
-
-    for (const item of seq) {
-        if (stopped) break;
-        if (item.type === 'video') {
-            await new Promise(resolve => {
-                const video = item.obj;
-                video.currentTime = 0;
-                video.play();
-                const step = () => {
-                    if (stopped || video.ended) { video.pause(); return resolve(); }
-                    octx.clearRect(0, 0, OUT_W, OUT_H);
-                    const scale = Math.max(OUT_W / video.videoWidth, OUT_H / video.videoHeight);
-                    const dw = video.videoWidth * scale, dh = video.videoHeight * scale;
-                    octx.drawImage(video, (OUT_W - dw) / 2, (OUT_H - dh) / 2, dw, dh);
-                    drawPreview();
-                    requestAnimationFrame(step);
-                };
-                requestAnimationFrame(step);
+                closeCropModal();
             });
-        } else if (item.type === 'image') {
-            await new Promise(resolve => {
-                const start = performance.now();
-                const step = now => {
-                    const elapsed = (now - start) / 1000;
-                    if (stopped || elapsed > item.duration) return resolve();
-                    
-                    drawTemplateText(octx, OUT_W, OUT_H, branchText.value, satsangPlaceText.value, templateBgColor.value);
-                    
-                    const progress = Math.min(1, elapsed / item.duration);
-                    const zoom = 1 + 0.10 * progress;
-                    const img = item.obj;
-                    const imgContainerY = OUT_H * 0.32, imgContainerH = OUT_H * 0.36;
-                    const imgContainerW = OUT_W;
-                    
-                    const containerAspectRatio = imgContainerW / imgContainerH;
-                    const imageAspectRatio = img.width / img.height;
 
-                    let scale;
-                    if (imageAspectRatio > containerAspectRatio) {
-                        scale = imgContainerH / img.height;
-                    } else {
-                        scale = imgContainerW / img.width;
+            // --- FOLDER INPUT LOGIC ---
+            folderInput.addEventListener('change', async (e) => {
+                const files = Array.from(e.target.files)
+                    .filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))
+                    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+                if (files.length === 0) {
+                    imageReviewContainer.classList.add('hidden');
+                    return;
+                }
+
+                updateStatus(`Reading ${files.length} images...`);
+                imageState = await Promise.all(files.map(file => new Promise(resolve => {
+                    const type = file.type.startsWith('video/') ? 'video' : 'image';
+                    const reader = new FileReader();
+
+                    reader.onload = async (event) => {
+                        const src = event.target.result;
+                        if (type === 'video') {
+                            // extract a poster frame to use as thumbnail and crop reference
+                            const video = document.createElement('video');
+                            video.src = src;
+                            video.muted = true;
+                            video.playsInline = true;
+                            await video.play().catch(() => { });
+                            const canvas = document.createElement('canvas');
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(video, 0, 0);
+                            const poster = canvas.toDataURL('image/jpeg');
+                            video.pause();
+                            resolve({ file, type, originalSrc: src, croppedSrc: src, posterSrc: poster, cropData: null });
+                        } else {
+                            resolve({ file, type, originalSrc: src, croppedSrc: src, name: file.name, cropData: null });
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                })));
+
+
+
+                imageThumbnailGrid.innerHTML = ''; // Clear previous thumbnails
+                imageState.forEach((media, index) => {
+                    const thumbContainer = document.createElement('div');
+                    thumbContainer.className = 'relative group';
+                    thumbContainer.dataset.index = index;
+
+                    const img = document.createElement('img');
+                    img.src = media.type === 'video' ? media.posterSrc : media.originalSrc;
+                    img.className = 'w-full h-full object-cover rounded-md aspect-square';
+                    thumbContainer.appendChild(img);
+
+                    const overlay = document.createElement('div');
+                    overlay.className = 'absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center transition-opacity rounded-md';
+
+                    const button = document.createElement('button');
+                    button.textContent = 'Crop';
+                    button.className = 'text-white text-sm bg-blue-600 px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity';
+                    button.onclick = () => openCropModal(index);
+
+                    overlay.appendChild(button);
+                    thumbContainer.appendChild(overlay);
+
+                    imageThumbnailGrid.appendChild(thumbContainer);
+                });
+
+
+                imageReviewContainer.classList.remove('hidden');
+                updateStatus(`Ready. ${files.length} images loaded. Crop them or proceed to recording.`);
+            });
+
+
+            // --- MAIN LOGIC ---
+            // --- MAIN LOGIC ---
+            startBtn.addEventListener('click', async () => {
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+                if (imageState.length === 0) {
+                    updateStatus("ERROR: Please select an images folder first.", true);
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    return;
+                }
+
+                updateStatus("1. Loading cropped media...");
+                const secPer = Math.max(1, Number(secPerInput.value) || 5);
+
+                const seq = [];
+
+                // --- Build sequence: include videos & images, attach their media reference ---
+                const introSource = introFile.files.length ? introFile.files[0] : DEFAULT_INTRO_URL;
+                const outroSource = outroFile.files.length ? outroFile.files[0] : DEFAULT_OUTRO_URL;
+
+                const canLoadVideo = (video, name) => new Promise(resolve => {
+                    video.addEventListener('canplay', () => resolve(video));
+                    video.addEventListener('error', () => {
+                        updateStatus(`Warning: ${name} video could not load.`, true);
+                        resolve(null);
+                    });
+                    setTimeout(() => resolve(null), 4000);
+                });
+
+                updateStatus("2. Loading intro video...");
+                const introVid = await canLoadVideo(makeVideoElement(introSource), "Intro");
+                if (introVid) seq.push({ type: 'video', obj: introVid, media: { cropData: null, trim: { start: 0, end: introVid.duration } } });
+
+                // add user images & videos
+                for (const media of imageState) {
+                    if (media.type === 'image') {
+                        const img = new Image();
+                        img.src = media.croppedSrc;
+                        seq.push({ type: 'image', obj: img, duration: secPer, media });
+                    } else if (media.type === 'video') {
+                        const v = makeVideoElement(media.originalSrc);
+                        seq.push({ type: 'video', obj: v, media });
                     }
-                    scale *= zoom;
+                }
 
-                    const drawWidth = img.width * scale;
-                    const drawHeight = img.height * scale;
-                    const dx = (imgContainerW - drawWidth) / 2;
-                    const dy = imgContainerY + (imgContainerH - drawHeight) / 2;
+                updateStatus("3. Loading outro video...");
+                const outroVid = await canLoadVideo(makeVideoElement(outroSource), "Outro");
+                if (outroVid) seq.push({ type: 'video', obj: outroVid, media: { cropData: null, trim: { start: 0, end: outroVid.duration } } });
 
-                    octx.save();
-                    octx.beginPath();
-                    octx.rect(0, imgContainerY, imgContainerW, imgContainerH);
-                    octx.clip();
-                    octx.drawImage(img, dx, dy, drawWidth, drawHeight);
-                    octx.restore();
+                // --- Audio setup ---
+                let audioContext, bgAudioBuffer;
+                if (audioFile.files.length) {
+                    updateStatus("4. Loading audio file...");
+                    try {
+                        audioContext = new AudioContext();
+                        const arrayBuffer = await audioFile.files[0].arrayBuffer();
+                        bgAudioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                        updateStatus("Audio loaded successfully.");
+                    } catch (e) {
+                        updateStatus("ERROR: Could not process audio file.", true);
+                        startBtn.disabled = false; stopBtn.disabled = true; return;
+                    }
+                }
 
-                    drawPreview();
-                    requestAnimationFrame(step);
+                // --- Recorder setup ---
+                updateStatus("5. Setting up recorder...");
+                const canvasStream = offscreenCanvas.captureStream(FPS);
+                const audioDestination = audioContext ? audioContext.createMediaStreamDestination() : null;
+                const finalStream = new MediaStream([
+                    ...canvasStream.getVideoTracks(),
+                    ...(audioDestination ? audioDestination.stream.getAudioTracks() : [])
+                ]);
+
+                const recorder = new MediaRecorder(finalStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+                const recordedBlobs = [];
+                recorder.ondataavailable = e => { if (e.data.size) recordedBlobs.push(e.data); };
+                recorder.onstop = () => {
+                    const blob = new Blob(recordedBlobs, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `reel.webm`;
+                    a.className = 'inline-block mt-4 px-5 py-2.5 bg-green-600 text-white font-medium uppercase rounded-lg shadow-md hover:bg-green-700';
+                    a.textContent = `Download Reel`;
+                    updateStatus('Recording finished. Click below to download.<br>');
+                    status.appendChild(a);
                 };
-                requestAnimationFrame(step);
-            });
-        }
-    }
 
-    // --- Finalize ---
-    if (recorder.state === "recording") recorder.stop();
-    if (audioContext && audioContext.state !== 'closed') audioContext.close();
-    startBtn.disabled = false;
-    stopBtn.disabled = true;
-    updateStatus("Processing final video...");
-  });
-})();
-</script>
+                recorder.start();
+                updateStatus("✅ Recording started...");
+                if (bgAudioBuffer) {
+                    const bgAudioSourceNode = audioContext.createBufferSource();
+                    bgAudioSourceNode.buffer = bgAudioBuffer;
+                    bgAudioSourceNode.connect(audioDestination);
+                    bgAudioSourceNode.connect(audioContext.destination);
+                    bgAudioSourceNode.start(0);
+                }
+
+                let stopped = false;
+                stopBtn.onclick = () => { stopped = true; };
+
+                const drawPreview = () => pctx.drawImage(offscreenCanvas, 0, 0, PREVIEW_W, PREVIEW_H);
+
+                // --- Render each sequence item ---
+                for (const item of seq) {
+                    if (stopped) break;
+
+                    if (item.type === 'video') {
+                        await new Promise(resolve => {
+                            const video = item.obj;
+                            const media = item.media;
+                            const crop = media?.cropData;
+                            const trim = media?.trim || { start: 0, end: video.duration };
+
+                            video.currentTime = trim.start || 0;
+                            video.play();
+
+                            const drawFrame = () => {
+                                if (stopped || video.currentTime >= (trim.end || video.duration) || video.ended) {
+                                    video.pause();
+                                    return resolve();
+                                }
+
+                                octx.clearRect(0, 0, OUT_W, OUT_H);
+
+                                if (crop) {
+                                    const { x, y, width, height } = crop;
+                                    const scale = Math.max(OUT_W / width, OUT_H / height);
+                                    const dw = width * scale;
+                                    const dh = height * scale;
+                                    octx.drawImage(video, x, y, width, height, (OUT_W - dw) / 2, (OUT_H - dh) / 2, dw, dh);
+                                } else {
+                                    const scale = Math.max(OUT_W / video.videoWidth, OUT_H / video.videoHeight);
+                                    const dw = video.videoWidth * scale;
+                                    const dh = video.videoHeight * scale;
+                                    octx.drawImage(video, (OUT_W - dw) / 2, (OUT_H - dh) / 2, dw, dh);
+                                }
+
+                                drawPreview();
+                                requestAnimationFrame(drawFrame);
+                            };
+
+                            requestAnimationFrame(drawFrame);
+                        });
+                    }
+
+                    else if (item.type === 'image') {
+                        await new Promise(resolve => {
+                            const start = performance.now();
+                            const step = now => {
+                                const elapsed = (now - start) / 1000;
+                                if (stopped || elapsed > item.duration) return resolve();
+
+                                drawTemplateText(octx, OUT_W, OUT_H, branchText.value, satsangPlaceText.value, templateBgColor.value);
+
+                                const progress = Math.min(1, elapsed / item.duration);
+                                const zoom = 1 + 0.10 * progress;
+                                const img = item.obj;
+                                const imgContainerY = OUT_H * 0.32, imgContainerH = OUT_H * 0.36;
+                                const imgContainerW = OUT_W;
+
+                                const containerAspectRatio = imgContainerW / imgContainerH;
+                                const imageAspectRatio = img.width / img.height;
+
+                                let scale = imageAspectRatio > containerAspectRatio
+                                    ? imgContainerH / img.height
+                                    : imgContainerW / img.width;
+                                scale *= zoom;
+
+                                const drawWidth = img.width * scale;
+                                const drawHeight = img.height * scale;
+                                const dx = (imgContainerW - drawWidth) / 2;
+                                const dy = imgContainerY + (imgContainerH - drawHeight) / 2;
+
+                                octx.save();
+                                octx.beginPath();
+                                octx.rect(0, imgContainerY, imgContainerW, imgContainerH);
+                                octx.clip();
+                                octx.drawImage(img, dx, dy, drawWidth, drawHeight);
+                                octx.restore();
+
+                                drawPreview();
+                                requestAnimationFrame(step);
+                            };
+                            requestAnimationFrame(step);
+                        });
+                    }
+                }
+
+                // --- Finalize ---
+                if (recorder.state === "recording") recorder.stop();
+                if (audioContext && audioContext.state !== 'closed') audioContext.close();
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                updateStatus("Processing final video...");
+            });
+
+        })();
+    </script>
 
 </body>
+
 </html>
